@@ -1,7 +1,6 @@
 // Search the article for #bodyContent and find all links pointing to other wikipedia articles
 var a = $("a[href^='/wiki']");
 
-var linkCount;
 var baseCircleHeight = 1;
 var baseCircleWidth = 2;
 
@@ -13,10 +12,8 @@ var secretMenu;
 
 restore_options();
 
-/*
-//debug
-$("#p-logo").append("<div id='debug'></div>");
-*/
+// Create array to store each wikilink object
+var wikilinks=new Array(); 
 
 // Hide extraneous wikipedia elements
 $("body").css({
@@ -30,10 +27,10 @@ $(".mw-body div, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, 
 });
 
 // Figure out how many backlinks each link has and call function to draw circles based on that info
-function getSignificance(origLink, index, subHref) {
+function getSignificance(index) {
 	var xhr = new XMLHttpRequest();
 
-	var whatLinksHereURL = "/w/index.php?title=Special:WhatLinksHere/" + subHref + "&limit=10000";
+	var whatLinksHereURL = "/w/index.php?title=Special:WhatLinksHere/" + wikilinks[index][1] + "&limit=10000";
 
 	xhr.open("GET", whatLinksHereURL, true);
 	xhr.onreadystatechange = function() {
@@ -52,10 +49,10 @@ function getSignificance(origLink, index, subHref) {
 			var nLast=tempContent.indexOf("</ul>");
 			// Remove everything after the end position, save it in a final string			
 			tempContent = tempContent.substring(0,nLast);
-			// Count number of <li> to determine number of links
-			linkCount = tempContent.match(/<li>/g).length;
+			// Count number of <li> to determine number of links, save it to array
+			wikilinks[index][2] = tempContent.match(/<li>/g).length;
 
-			drawCircles(origLink, subHref, linkCount, index);
+			drawCircles(index);
   		};
 	};
 	xhr.send();
@@ -67,22 +64,14 @@ function getSignificance(origLink, index, subHref) {
 
 
 // Draw circles for each link based on number of backlinks
-function drawCircles(origLink, subHref, linkCount, index) {
-
-/*
-//debug panel
-$("#debug").append("<br>" + index + " " + subHref);
-$("#debug").append("<br>linkCount= " + linkCount);
-$("#debug").append("<br>numberOfCircles= " + numberOfCircles);
-$("#debug").append("<br>_________");
-*/
+function drawCircles(index) {
 
 	// Add a circle object for each link
 	// If there isn't a circle placholder yet, then add a new one	
-	if ($("#circle" + index).length == 0) {
+	if ( $("#circle" + index).length == 0) {
 
 		// Create circle objects for each link; more circles for more important links
-		var numberOfCircles = Math.ceil(linkCount / increment);
+		wikilinks[index][3] = Math.ceil(wikilinks[index][2] / increment);
 		var circleHeight = baseCircleHeight;
 		var circleWidth = baseCircleWidth;
 		var circleObjects = "";
@@ -92,16 +81,17 @@ $("#debug").append("<br>_________");
 		var depthIncrementWidth = 20;
 
 		// Math to find center location of link
-		var linkPosition = origLink.position();
-		var linkPosTop =  linkPosition.top;
+		var linkPosition = wikilinks[index][0].position();
+		var linkPosTop = linkPosition.top;
 		var linkPosLeft = linkPosition.left;
-		var linkHeight = origLink.height();
-		var linkWidth = origLink.width();
-		var linkCenterVertical = linkPosTop + linkHeight/2;
-		var linkCenterHorizontal = linkPosLeft + linkWidth/2
+		var linkHeight = wikilinks[index][0].height();
+		var linkWidth = wikilinks[index][0].width();
 
+		// Save vertical/horizontal center positions to array
+		wikilinks[index][4] = linkPosTop + linkHeight/2;
+		wikilinks[index][5] = linkPosLeft + linkWidth/2;
 
-		for (var n=numberOfCircles; n > 0; n--) {
+		for (var n=wikilinks[index][3]; n > 0; n--) {
 			depthIncrementHeight = depthIncrementHeight * 1.03;
 			depthIncrementWidth = depthIncrementWidth * 1.03;
 
@@ -115,7 +105,7 @@ $("#debug").append("<br>_________");
 			} else {
 				circleObjects = "<span class='circle level_" + n + "' id='circle" + index + "a'></span>";
 			}
-			origLink.after(circleObjects);
+			wikilinks[index][0].after(circleObjects);
 
 
 			if (displayType == "stroke") {
@@ -124,8 +114,8 @@ $("#debug").append("<br>_________");
 				// Size and position 'b' circles
 				$(".level_" + n + "#circle" + index + "b").css({
 			        position: "absolute",
-			        top:  linkCenterVertical,
-			        left: linkCenterHorizontal,
+			        top:  wikilinks[index][4],
+			        left: wikilinks[index][5],
 			        zIndex: -1000+2*n,
 			        // Height and width are slightly bigger to create offset
 			        height: circleHeight + 4,
@@ -155,8 +145,8 @@ $("#debug").append("<br>_________");
 				// Size and position 'b' circles
 				$(".level_" + n + "#circle" + index + "b").css({
 			        position: "absolute",
-			        top:  linkCenterVertical,
-			        left: linkCenterHorizontal,
+			        top:  wikilinks[index][4],
+			        left: wikilinks[index][5],
 			        zIndex: -1000+2*n,
 			        // Height and width are slightly bigger to create offset
 			        height: circleHeight + 2,
@@ -180,8 +170,8 @@ $("#debug").append("<br>_________");
 			// Size and position 'a' circles
 			$(".level_" + n + "#circle" + index + "a").css({
 		        position: "absolute",
-		        top:  linkCenterVertical,
-		        left: linkCenterHorizontal,
+		        top:  wikilinks[index][4],
+		        left: wikilinks[index][5],
 		        zIndex: -1000+2*n+1,
 		        height: circleHeight,
 		        width: circleWidth,
@@ -284,26 +274,33 @@ function hideWikiContent() {
 
 
 a.each(function (index) {
-	var origLink = $(this);
-	origLink.attr("class","wikiLink");
-	var origHref = origLink.attr("href");
-	var subHref = origHref.substring(6);
+
+	$(this).attr("class","wikiLink");
+
+	wikilinks[index] = new Array ( 
+		$(this),  							// [0] wikilink object
+		$(this).attr("href").substring(6),  // [1] wikilink href
+		"",  								// [2] number of whatlinkshere links (set later)
+		"",  								// [3] number of circles to create (set later)
+		"",  								// [4] wikilink vertical center position (set later)
+		""  								// [5] wikilink horizontal center position (set later)
+	);
 
 	// Only draw circles for wikipedia links that we think are in the main body of the article
 	// Main body is currently defined as being exactly two levels below--child of a child--an object with id "mw-content-text"
 	// Don't use any links that include a ":"
 
 	// Filter out any links with a ":"
-	if (origLink.attr("href").indexOf(":") == "-1") {
+	if (wikilinks[index][0].attr("href").indexOf(":") == "-1") {
 		// Only use links within the .mw-content.text div
-		if (origLink.parents("div").attr("id") == "mw-content-text") {
+		if (wikilinks[index][0].parents("div").attr("id") == "mw-content-text") {
 			// Filter out any links in the Coordinates span
-			if (origLink.parents("span").attr("id") == "coordinates") {
+			if (wikilinks[index][0].parents("span").attr("id") == "coordinates") {
 			// Filter out any links in the Reference list
-			} else if (origLink.parents("div").attr("class") == "reflist") {
+			} else if (wikilinks[index][0].parents("div").attr("class") == "reflist") {
 			// Finally, take the links that match criteria and do stuff with them
 			} else {
-				getSignificance(origLink, index, subHref);				
+				getSignificance( index );
 			};
 		};
 	};
@@ -446,5 +443,36 @@ function restore_options() {
 	});
 
 }
+
+
+
+$(document).ready(function() {	
+	/* Scroll event handler */
+    $(window).bind('scroll',function(e){
+    	var scrolled = $(window).scrollTop();
+    	moveCircles(scrolled);
+    });
+});
+
+function moveCircles(scrolled) {
+
+	// For each wikilink... 
+	for (i = 0; i < wikilinks.length; i++) {
+
+		// Adjust top position for each of it's circles
+		for (j = 0; j < wikilinks[i][3]+1; j++) {
+
+			var speed = 0.02*j ;
+
+			$("#circle" + i + "a.level_" + j).css({
+				top: wikilinks[i][4] - speed*scrolled + "px"
+			});
+
+		}
+
+	}
+
+}
+
 
 document.querySelector('#optionsSaveButton').addEventListener('click', save_options);
