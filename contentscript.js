@@ -10,6 +10,9 @@ var increment;
 var hideArticleContent;
 var secretMenu;
 
+var scrolled = $(window).scrollTop();
+var windowHalfSize = window.innerHeight / 2;
+
 restore_options();
 
 // Create array to store each wikilink object
@@ -245,6 +248,8 @@ function drawCircles(index) {
 
 		};
 	};
+	moveCircles(index);
+
 };
 
 
@@ -300,10 +305,11 @@ a.each(function (index) {
 			} else if (wikilinks[index][0].parents("div").attr("class") == "reflist") {
 			// Finally, take the links that match criteria and do stuff with them
 			} else {
-				getSignificance( index );
+				getSignificance(index);
 			};
 		};
 	};
+
 });
 
 displayPanel();
@@ -449,29 +455,26 @@ function restore_options() {
 $(document).ready(function() {	
 	/* Scroll event handler */
     $(window).bind('scroll',function(e){
-    	var scrolled = $(window).scrollTop();
-    	moveCircles(scrolled);
+    	scrolled = $(window).scrollTop();
+
+		// For each wikilink... 
+		for (i = 0; i < wikilinks.length; i++) {
+	    	moveCircles(i);
+	    }
+
     });
 });
 
-function moveCircles(scrolled) {
+function moveCircles(i) {
 
-	// For each wikilink... 
-	for (i = 0; i < wikilinks.length; i++) {
+	// Adjust top position for each of it's circles
+	for (j = 0; j < wikilinks[i][3]+1; j++) {
+		var perspectiveAdjuster = 0.012 * (j^(1/20)) ;
 
-		// Adjust top position for each of it's circles
-		for (j = 0; j < wikilinks[i][3]+1; j++) {
-
-			var speed = 0.02*j ;
-
-			$("#circle" + i + "a.level_" + j).css({
-				top: wikilinks[i][4] - speed*scrolled + "px"
-			});
-
-		}
-
+		$("#circle" + i + "a.level_" + j).css({
+			top: wikilinks[i][4] + (wikilinks[i][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
+		});
 	}
-
 }
 
 
