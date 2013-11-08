@@ -8,6 +8,7 @@ var savedOnce;
 var displayType;
 var increment;
 var hideArticleContent;
+var staticView;
 var secretMenu;
 
 var scrolled = $(window).scrollTop();
@@ -188,7 +189,12 @@ function drawCircles(index) {
 
 		};
 	};
-	moveCircles(index);
+
+	// If staticView is false, then set initial parallax effect
+	if (!staticView) {
+		moveCircles(index);
+		alert("asdfsd");
+	}
 
 };
 
@@ -258,7 +264,7 @@ displayPanel();
 
 // Insert menu into page
 function displayPanel() {
-	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Stroke<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Stroke<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black Stroke</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="hideArticleContentCheckbox" value="hideArticleContent"> Hide Article Content<br><br><button type="submit" id="optionsSaveButton">Save and Refresh</button><div id="optionsStatus"></div></form></div>');
+	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Stroke<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Stroke<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black Stroke</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="hideArticleContentCheckbox" value="hideArticleContent"> Hide Article Content<br><input type="checkbox" id="staticViewCheckbox" value="staticView"> Static View<br><br><button type="submit" id="optionsSaveButton">Save and Refresh</button><div id="optionsStatus"></div></form></div>');
 }
 
 $("#optionsHeader").click(function() {
@@ -274,6 +280,7 @@ function save_options() {
 	var hybridRadio = document.getElementById("hybridRadio");
 	var incrementField = document.getElementById("incrementField");
 	var hideArticleContentCheckbox = document.getElementById("hideArticleContentCheckbox");
+	var staticViewCheckbox = document.getElementById("staticViewCheckbox");
 
 	status.innerHTML = "";
 
@@ -319,6 +326,13 @@ function save_options() {
 		chrome.storage.sync.set({"hideArticleContent": false}, function() {});
 	}
 
+	// Figure out whether to turn on static view (turn off parallax) and update storage with that info
+	if (staticViewCheckbox.checked==true) {
+		chrome.storage.sync.set({"staticView": true}, function() {});
+	} else {
+		chrome.storage.sync.set({"staticView": false}, function() {});
+	}
+
 	// savedOnce tracks whether the user has saved settings at least once, set it to true globally and locally upon save
 	chrome.storage.sync.set({"savedOnce": true}, function() {});
 	savedOnce = true;
@@ -336,11 +350,12 @@ function save_options() {
 
 // Restores select box state to saved value from localStorage.
 function restore_options() {
-	chrome.storage.sync.get(['savedOnce', 'displayType', 'increment', 'hideArticleContent', 'secretMenu'], function(data) {
+	chrome.storage.sync.get(['savedOnce', 'displayType', 'increment', 'hideArticleContent', 'staticView', 'secretMenu'], function(data) {
 		savedOnce = data.savedOnce;
 		displayType = data.displayType;
 		increment = data.increment;
 		hideArticleContent = data.hideArticleContent;
+		staticView = data.staticView;
 		secretMenu = data.secretMenu;
 
 		if (displayType == "fill") { document.getElementById("fillRadio").checked=true;
@@ -364,9 +379,29 @@ function restore_options() {
 		} else { document.getElementById("hideArticleContentCheckbox").checked=false;  
 		}
 
+		if (staticView) { 
+			document.getElementById("staticViewCheckbox").checked=true;
+			hideWikiContent();
+		} else { 
+			document.getElementById("staticViewCheckbox").checked=false;  
+
+			// If staticView is false, then turn on bind parallax effect to scroll
+			$(document).ready(function() {	
+			    $(window).bind('scroll',function(e){
+			    	scrolled = $(window).scrollTop();
+
+					// Go through each wikilink...
+					for (index = 0; index < wikilinks.length; index++) {
+						moveCircles(index);
+				    }
+			    });
+			});
+
+		}
+
 		if (secretMenu) { $("#displayChoicesHidden").css("display","inline-block"); }
 
-		// If settings have never been saved, automatically set fill = true, increment = 50, hideArticleContent = false
+		// If settings have never been saved, automatically set fill = true, increment = 50, hideArticleContent = false, staticView = false
 		if (!savedOnce) {
 			chrome.storage.sync.set({"displayType": "hybrid"}, function() {});
 			chrome.storage.sync.set({"increment": 50}, function() {});
@@ -375,23 +410,12 @@ function restore_options() {
 			$("#optionsForm").slideToggle();
 			increment = 50;
 			hideArticleContent = false;
+			staticView = false;
 		} 
 
 	});
 }
 
-
-$(document).ready(function() {	
-	/* Scroll event handler */
-    $(window).bind('scroll',function(e){
-    	scrolled = $(window).scrollTop();
-
-		// Go through each wikilink...
-		for (index = 0; index < wikilinks.length; index++) {
-			moveCircles(index);
-	    }
-    });
-});
 
 // Move circles (parallax effect)
 function moveCircles(index) {
