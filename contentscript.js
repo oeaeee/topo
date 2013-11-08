@@ -471,7 +471,7 @@ $(document).ready(function() {
 
 // Move circles (parallax effect)
 function moveCircles(index) {
-	// Only apply parallax effect if the wikilink is within the window frame
+	// Only apply parallax effect if the wikilink is within the window frame (with a little buffer)
 	if ( ((wikilinks[index][4]) > scrolled) && (wikilinks[index][4] < (scrolled + windowHalfSize*2)) ) {
 
 		// Adjust top position for each of it's circles
@@ -482,11 +482,6 @@ function moveCircles(index) {
 			$("#circle" + index + "a.level_" + j).css({
 				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
 			});
-			$("#circle" + index + "a").css({
-				backgroundColor: "red"
-			});
-
-
 		}
     
 	}
