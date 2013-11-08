@@ -1,8 +1,8 @@
 // Search the article for #bodyContent and find all links pointing to other wikipedia articles
 var a = $("a[href^='/wiki']");
 
-var baseCircleHeight = 1;
-var baseCircleWidth = 2;
+var baseCircleHeight = 2;
+var baseCircleWidth = 4;
 
 var savedOnce;
 var displayType;
@@ -95,12 +95,17 @@ function drawCircles(index) {
 		wikilinks[index][5] = linkPosLeft + linkWidth/2;
 
 		for (var n=wikilinks[index][3]; n > 0; n--) {
-			depthIncrementHeight = depthIncrementHeight * 1.03;
-			depthIncrementWidth = depthIncrementWidth * 1.03;
+			depthIncrementHeight = depthIncrementHeight * 0.94;
+			depthIncrementWidth = depthIncrementWidth * 0.94;
 
 			// Circles are drawn from smallest to biggest, set circle dimensions 
 			circleHeight = circleHeight + depthIncrementHeight;
 			circleWidth = circleWidth + depthIncrementWidth;
+
+			// Save size of biggest circle
+			if (n == 1) {
+				wikilinks[index][6] = circleHeight;
+			}
 
 			// If stroke is selected, create a second set of circles -- 'b' circles
 			if (displayType == "stroke" || displayType == "blueStroke") {
@@ -236,11 +241,11 @@ function drawCircles(index) {
 			if (displayType == "blackHybrid") {
 				if (hybridOdd) {
 					// For odd circles, show color
-					$(".level_" + n + "#circle" + index + "a").css({ background: "black" });		
+					$(".level_" + n + "#circle" + index + "a").css({ background: "white" });		
 					hybridOdd = false;
 				} else {
 					// For even circles, show white
-					$(".level_" + n + "#circle" + index + "a").css({ background: "white" });
+					$(".level_" + n + "#circle" + index + "a").css({ background: "black" });
 				    hybridOdd = true;
 				}
 
@@ -288,7 +293,8 @@ a.each(function (index) {
 		"",  								// [2] number of whatlinkshere links (set later)
 		"",  								// [3] number of circles to create (set later)
 		"",  								// [4] wikilink vertical center position (set later)
-		""  								// [5] wikilink horizontal center position (set later)
+		"",  								// [5] wikilink horizontal center position (set later)
+		""									// [6] size of biggest circle (set later)
 	);
 
 	// Only draw circles for wikipedia links that we think are in the main body of the article
@@ -451,29 +457,38 @@ function restore_options() {
 }
 
 
-
 $(document).ready(function() {	
 	/* Scroll event handler */
     $(window).bind('scroll',function(e){
     	scrolled = $(window).scrollTop();
 
-		// For each wikilink... 
-		for (i = 0; i < wikilinks.length; i++) {
-	    	moveCircles(i);
+		// Go through each wikilink...
+		for (index = 0; index < wikilinks.length; index++) {
+			moveCircles(index);
 	    }
-
     });
 });
 
-function moveCircles(i) {
+// Move circles (parallax effect)
+function moveCircles(index) {
+	// Only apply parallax effect if the wikilink is within the window frame
+	if ( ((wikilinks[index][4]) > scrolled) && (wikilinks[index][4] < (scrolled + windowHalfSize*2)) ) {
 
-	// Adjust top position for each of it's circles
-	for (j = 0; j < wikilinks[i][3]+1; j++) {
-		var perspectiveAdjuster = 0.012 * (j^(1/20)) ;
+		// Adjust top position for each of it's circles
+		for (j = 0; j < wikilinks[index][3]+1; j++) {
 
-		$("#circle" + i + "a.level_" + j).css({
-			top: wikilinks[i][4] + (wikilinks[i][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
-		});
+			var perspectiveAdjuster = 0.005 * (j^(1/20)); 	// 
+
+			$("#circle" + index + "a.level_" + j).css({
+				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
+			});
+			$("#circle" + index + "a").css({
+				backgroundColor: "red"
+			});
+
+
+		}
+    
 	}
 }
 
