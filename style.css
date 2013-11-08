@@ -98,9 +98,11 @@ body {
 
 #optionsSaveButton {
 	background:black;
+	border:none;
 	text-align: center;
 	padding:15px;
 	color:white;
+	font: 1.0em/1.2em sans-serif;
 	border-radius:8px;
 }
 

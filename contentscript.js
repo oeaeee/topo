@@ -107,76 +107,11 @@ function drawCircles(index) {
 				wikilinks[index][6] = circleHeight;
 			}
 
-			// If stroke is selected, create a second set of circles -- 'b' circles
-			if (displayType == "stroke" || displayType == "blueStroke") {
-				circleObjects = "<span class='circle level_" + n + "' id='circle" + index + "b'></span><span class='circle level_" + n + "' id='circle" + index + "a'></span>";				
-			} else {
-				circleObjects = "<span class='circle level_" + n + "' id='circle" + index + "a'></span>";
-			}
+			circleObjects = "<span class='circle level_" + n + "' id='circle" + index + "'></span>";
 			wikilinks[index][0].after(circleObjects);
 
-
-			if (displayType == "stroke") {
-				// Strokes are faked by using two circles; the 'a' circle covers most of the 'b' to fake a stroke				
-
-				// Size and position 'b' circles
-				$(".level_" + n + "#circle" + index + "b").css({
-			        position: "absolute",
-			        top:  wikilinks[index][4],
-			        left: wikilinks[index][5],
-			        zIndex: -1000+2*n,
-			        // Height and width are slightly bigger to create offset
-			        height: circleHeight + 4,
-			        width: circleWidth + 4,
-			        // Margins are slightly off to center appropriately
-			        marginTop: -circleHeight/2 - 2, 
-			        marginLeft: -circleWidth/2 - 2,
-				    borderTopLeftRadius: circleWidth/2 + "px " + circleHeight/2 + "px", 
-				    borderTopRightRadius: circleWidth/2 + "px " + circleHeight/2 + "px", 
-				    borderBottomLeftRadius: circleWidth/2 + "px " + circleHeight/2 + "px", 
-				    borderBottomRightRadius: circleWidth/2 + "px " + circleHeight/2 + "px",
-			    });
-
-				if (n <= 10) { var strokeLum = 100-n}
-				if (n > 10) { var strokeLum = 90 }
-				// Fill 'a' circles with a white background to cover most of the 'b' circles
-				$(".level_" + n + "#circle" + index + "a").css({ background: "white" });
-			    // Fill 'b' circles with color
-				$(".level_" + n + "#circle" + index + "b").css({ background: "hsl(0, 0%," + strokeLum + "%)" });		
-
-			}
-
-			if (displayType == "blueStroke") {
-				// Strokes are faked by using two circles; the 'a' circle covers most of the 'b' to fake a stroke				
-				$("#content.mw-body").css({ background: "#0c3b90" });
-
-				// Size and position 'b' circles
-				$(".level_" + n + "#circle" + index + "b").css({
-			        position: "absolute",
-			        top:  wikilinks[index][4],
-			        left: wikilinks[index][5],
-			        zIndex: -1000+2*n,
-			        // Height and width are slightly bigger to create offset
-			        height: circleHeight + 2,
-			        width: circleWidth + 2,
-			        // Margins are slightly off to center appropriately
-			        marginTop: -circleHeight/2 - 1, 
-			        marginLeft: -circleWidth/2 - 1,
-				    borderTopLeftRadius: circleWidth/2 + "px " + circleHeight/2 + "px", 
-				    borderTopRightRadius: circleWidth/2 + "px " + circleHeight/2 + "px", 
-				    borderBottomLeftRadius: circleWidth/2 + "px " + circleHeight/2 + "px", 
-				    borderBottomRightRadius: circleWidth/2 + "px " + circleHeight/2 + "px",
-			    });
-
-				// Fill 'a' circles
-				$(".level_" + n + "#circle" + index + "a").css({ background: "#0c3b90" });
-			    // Fill 'b' circles
-				$(".level_" + n + "#circle" + index + "b").css({ background: "white" });		
-
-			}
-
 			// Size and position 'a' circles
-			$(".level_" + n + "#circle" + index + "a").css({
+			$(".level_" + n + "#circle" + index).css({
 		        position: "absolute",
 		        top:  wikilinks[index][4],
 		        left: wikilinks[index][5],
@@ -202,8 +137,8 @@ function drawCircles(index) {
 					bgLumFill = 98 - 2*(n-9);
 				}
 
-				// Style 'a' circles
-				$(".level_" + n + "#circle" + index + "a").css({ background: "hsla(" + bgHueFill + "," + bgSatFill + "%," + bgLumFill + "%, 1.0)" });		
+				// Style circles
+				$(".level_" + n + "#circle" + index).css({ background: "hsla(" + bgHueFill + "," + bgSatFill + "%," + bgLumFill + "%, 1.0)" });		
 		    }
 
 			// Show hybrid styling if hybrid is selected
@@ -217,11 +152,11 @@ function drawCircles(index) {
 						bgLumFill = 90;
 					}
 					// For odd circles, show color
-					$(".level_" + n + "#circle" + index + "a").css({ background: "hsla(" + bgHueFill + "," + bgSatFill + "%," + bgLumFill + "%, 1.0)" });		
+					$(".level_" + n + "#circle" + index).css({ background: "hsla(" + bgHueFill + "," + bgSatFill + "%," + bgLumFill + "%, 1.0)" });		
 					hybridOdd = false;
 				} else {
 					// For even circles, show white
-					$(".level_" + n + "#circle" + index + "a").css({ background: "white" });
+					$(".level_" + n + "#circle" + index).css({ background: "white" });
 				    hybridOdd = true;
 				}
 			}
@@ -229,11 +164,11 @@ function drawCircles(index) {
 			if (displayType == "yellowHybrid") {
 				if (hybridOdd) {
 					// For odd circles, show color
-					$(".level_" + n + "#circle" + index + "a").css({ background: "#d1b101" });		
+					$(".level_" + n + "#circle" + index).css({ background: "#d1b101" });		
 					hybridOdd = false;
 				} else {
 					// For even circles, show white
-					$(".level_" + n + "#circle" + index + "a").css({ background: "white" });
+					$(".level_" + n + "#circle" + index).css({ background: "white" });
 				    hybridOdd = true;
 				}
 			}
@@ -241,11 +176,11 @@ function drawCircles(index) {
 			if (displayType == "blackHybrid") {
 				if (hybridOdd) {
 					// For odd circles, show color
-					$(".level_" + n + "#circle" + index + "a").css({ background: "white" });		
+					$(".level_" + n + "#circle" + index).css({ background: "white" });		
 					hybridOdd = false;
 				} else {
 					// For even circles, show white
-					$(".level_" + n + "#circle" + index + "a").css({ background: "black" });
+					$(".level_" + n + "#circle" + index).css({ background: "black" });
 				    hybridOdd = true;
 				}
 
@@ -323,7 +258,7 @@ displayPanel();
 
 // Insert menu into page
 function displayPanel() {
-	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="strokeRadio" value="stroke"> Stroke<br><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Hybrid<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="blueStrokeRadio" value="blueStroke"> Blue Stroke<br><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Hybrid<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="hideArticleContentCheckbox" value="hideArticleContent"> Hide Article Content<br><br><div id="optionsSaveButton">Save and Refresh</div><div id="optionsStatus"></div></form></div>');
+	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Hybrid<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Hybrid<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="hideArticleContentCheckbox" value="hideArticleContent"> Hide Article Content<br><br><button type="submit" id="optionsSaveButton">Save and Refresh</button><div id="optionsStatus"></div></form></div>');
 }
 
 $("#optionsHeader").click(function() {
@@ -335,7 +270,6 @@ $("#optionsHeader").click(function() {
 function save_options() {
 
 	var status = document.getElementById("optionsStatus");
-	var strokeRadio = document.getElementById("strokeRadio");
 	var fillRadio = document.getElementById("fillRadio");
 	var hybridRadio = document.getElementById("hybridRadio");
 	var incrementField = document.getElementById("incrementField");
@@ -344,16 +278,12 @@ function save_options() {
 	status.innerHTML = "";
 
 	// Figure out which displayType is selected and update storage with that info
-	if (strokeRadio.checked==true) {
-		chrome.storage.sync.set({"displayType": "stroke"}, function() {});
-	} else if (fillRadio.checked==true) {
+	if (fillRadio.checked==true) {
 		chrome.storage.sync.set({"displayType": "fill"}, function() {});
 	} else if (hybridRadio.checked==true) {
 		chrome.storage.sync.set({"displayType": "hybrid"}, function() {});
 	} else if (noneRadio.checked==true) {
 		chrome.storage.sync.set({"displayType": "none"}, function() {});
-	} else if (blueStrokeRadio.checked==true) {
-		chrome.storage.sync.set({"displayType": "blueStroke"}, function() {});
 	} else if (yellowHybridRadio.checked==true) {
 		chrome.storage.sync.set({"displayType": "yellowHybrid"}, function() {});
 	} else if (blackHybridRadio.checked==true) {
@@ -406,7 +336,6 @@ function save_options() {
 
 // Restores select box state to saved value from localStorage.
 function restore_options() {
-
 	chrome.storage.sync.get(['savedOnce', 'displayType', 'increment', 'hideArticleContent', 'secretMenu'], function(data) {
 		savedOnce = data.savedOnce;
 		displayType = data.displayType;
@@ -414,16 +343,12 @@ function restore_options() {
 		hideArticleContent = data.hideArticleContent;
 		secretMenu = data.secretMenu;
 
-		if (displayType == "stroke") { document.getElementById("strokeRadio").checked=true;
-			} else { document.getElementById("strokeRadio").checked=false; }
 		if (displayType == "fill") { document.getElementById("fillRadio").checked=true;
 			} else { document.getElementById("fillRadio").checked=false; }
 		if (displayType == "hybrid") { document.getElementById("hybridRadio").checked=true;
 			} else { document.getElementById("hybridRadio").checked=false; }
 		if (displayType == "none") { document.getElementById("noneRadio").checked=true;
 			} else { document.getElementById("noneRadio").checked=false; }
-		if (displayType == "blueStroke") { document.getElementById("blueStrokeRadio").checked=true;
-			} else { document.getElementById("blueStrokeRadio").checked=false; }
 		if (displayType == "yellowHybrid") { document.getElementById("yellowHybridRadio").checked=true;
 			} else { document.getElementById("yellowHybridRadio").checked=false; }
 		if (displayType == "blackHybrid") { document.getElementById("blackHybridRadio").checked=true;
@@ -453,7 +378,6 @@ function restore_options() {
 		} 
 
 	});
-
 }
 
 
@@ -479,7 +403,7 @@ function moveCircles(index) {
 
 			var perspectiveAdjuster = 0.005 * (j^(1/20)); 	// 
 
-			$("#circle" + index + "a.level_" + j).css({
+			$("#circle" + index + ".level_" + j).css({
 				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
 			});
 		}
