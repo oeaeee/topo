@@ -81,7 +81,7 @@ function drawCircles(index) {
 		var hybridOdd = true;
 
 		var depthIncrementHeight = 10;
-		var depthIncrementWidth = 20;
+		var depthIncrementWidth = 16;
 
 		// Math to find center location of link
 		var linkPosition = wikilinks[index][0].position();
@@ -95,8 +95,8 @@ function drawCircles(index) {
 		wikilinks[index][5] = linkPosLeft + linkWidth/2;
 
 		for (var n=wikilinks[index][3]; n > 0; n--) {
-			depthIncrementHeight = depthIncrementHeight * 0.94;
-			depthIncrementWidth = depthIncrementWidth * 0.94;
+			depthIncrementHeight = depthIncrementHeight * 0.98;
+			depthIncrementWidth = depthIncrementWidth * 0.98;
 
 			// Circles are drawn from smallest to biggest, set circle dimensions 
 			circleHeight = circleHeight + depthIncrementHeight;
@@ -164,11 +164,11 @@ function drawCircles(index) {
 			if (displayType == "yellowHybrid") {
 				if (hybridOdd) {
 					// For odd circles, show color
-					$(".level_" + n + "#circle" + index).css({ background: "#d1b101" });		
+					$(".level_" + n + "#circle" + index).css({ background: "white" });		
 					hybridOdd = false;
 				} else {
 					// For even circles, show white
-					$(".level_" + n + "#circle" + index).css({ background: "white" });
+					$(".level_" + n + "#circle" + index).css({ background: "#d1b101" });
 				    hybridOdd = true;
 				}
 			}
@@ -258,7 +258,7 @@ displayPanel();
 
 // Insert menu into page
 function displayPanel() {
-	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Hybrid<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Hybrid<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="hideArticleContentCheckbox" value="hideArticleContent"> Hide Article Content<br><br><button type="submit" id="optionsSaveButton">Save and Refresh</button><div id="optionsStatus"></div></form></div>');
+	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Stroke<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Stroke<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black Stroke</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="hideArticleContentCheckbox" value="hideArticleContent"> Hide Article Content<br><br><button type="submit" id="optionsSaveButton">Save and Refresh</button><div id="optionsStatus"></div></form></div>');
 }
 
 $("#optionsHeader").click(function() {
@@ -401,7 +401,7 @@ function moveCircles(index) {
 		// Adjust top position for each of it's circles
 		for (j = 0; j < wikilinks[index][3]+1; j++) {
 
-			var perspectiveAdjuster = 0.005 * (j^(1/20)); 	// 
+			var perspectiveAdjuster = 0.01 * (j^(1/20)); 	// 
 
 			$("#circle" + index + ".level_" + j).css({
 				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
