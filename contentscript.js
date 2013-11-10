@@ -7,14 +7,14 @@ var baseCircleWidth = 4;
 var savedOnce;
 var displayType;
 var increment;
-var hideArticleContent;
+var contentIsVisible;
 var staticView;
 var secretMenu;
 
 var scrolled = $(window).scrollTop();
 var windowHalfSize = window.innerHeight / 2;
 
-restore_options();
+restoreOptions();
 
 // Create array to store each wikilink object
 var wikilinks=new Array(); 
@@ -26,9 +26,9 @@ $("body").css({
 $("#toc").css({
 	display: "none",
 });
-$(".mw-body div, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .mw-normal-catlinks, .external, .infobox").css({
-	backgroundColor: "transparent",
-});
+	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
+		backgroundColor: "transparent",
+	});
 
 // Figure out how many backlinks each link has and call function to draw circles based on that info
 function getSignificance(index) {
@@ -111,7 +111,7 @@ function drawCircles(index) {
 			circleObjects = "<span class='circle level_" + n + "' id='circle" + index + "'></span>";
 			wikilinks[index][0].after(circleObjects);
 
-			// Size and position 'a' circles
+			// Size and position circles
 			$(".level_" + n + "#circle" + index).css({
 		        position: "absolute",
 		        top:  wikilinks[index][4],
@@ -164,11 +164,11 @@ function drawCircles(index) {
 
 			if (displayType == "yellowHybrid") {
 				if (hybridOdd) {
-					// For odd circles, show color
+					// For odd circles, show white
 					$(".level_" + n + "#circle" + index).css({ background: "white" });		
 					hybridOdd = false;
 				} else {
-					// For even circles, show white
+					// For even circles, show color
 					$(".level_" + n + "#circle" + index).css({ background: "#d1b101" });
 				    hybridOdd = true;
 				}
@@ -176,11 +176,11 @@ function drawCircles(index) {
 
 			if (displayType == "blackHybrid") {
 				if (hybridOdd) {
-					// For odd circles, show color
+					// For odd circles, show white
 					$(".level_" + n + "#circle" + index).css({ background: "white" });		
 					hybridOdd = false;
 				} else {
-					// For even circles, show white
+					// For even circles, show color
 					$(".level_" + n + "#circle" + index).css({ background: "black" });
 				    hybridOdd = true;
 				}
@@ -193,15 +193,26 @@ function drawCircles(index) {
 	// If staticView is false, then set initial parallax effect
 	if (!staticView) {
 		moveCircles(index);
-		alert("asdfsd");
 	}
 
 };
 
+function toggleWikiContent() {
+	// If content is visible, hide it and update storage settings
+	if (contentIsVisible == true) {  
+		hideWikiContent();
+		chrome.storage.sync.set({"contentIsVisible": false}, function() {});
+	// If content is hidden, show it and update storage settings
+	} else if (contentIsVisible == false) {
+		showWikiContent();
+		chrome.storage.sync.set({"contentIsVisible": true}, function() {});
+	}
+
+}
 
 function hideWikiContent() {
-// Hide everything but title
-	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .mw-normal-catlinks, .external, .infobox").css({
+	// Hide everything but title
+	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
 		color: "transparent",
 		backgroundColor: "transparent",
 		border: "none",
@@ -209,7 +220,8 @@ function hideWikiContent() {
 	$("img, ul, .external, .mediaContainer, .reference-text, code").css({
 		opacity: 0.0,
 	});
-// Style title
+
+	// Style title
 	$(".firstHeading span").css({
 		background: "white",
 		position: "inherit",
@@ -221,6 +233,39 @@ function hideWikiContent() {
 		color: "black",
 		background: "white",
 	});	
+
+	contentIsVisible = true;
+};
+
+
+function showWikiContent() {
+	// Show everything
+	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
+		color: "black",
+		backgroundColor: "transparent",
+		border: "none"
+	});
+	$("img, ul, .external, .mediaContainer, .reference-text, code").css({
+		opacity: 1.0,
+	});
+	$("#firstHeading, h2").css({
+		borderBottom: "1px solid #aaa"
+	});
+	$(".infobox, .catlinks").css({
+		border: "1px solid #aaa"
+	});
+
+	// Style title
+	$(".firstHeading span").css({
+		background: "transparent",
+		position: "inherit",
+	});
+	$("#siteSub").css({
+		color: "black",
+		background: "transparent",
+	});	
+
+	contentIsVisible = false;
 };
 
 
@@ -264,7 +309,7 @@ displayPanel();
 
 // Insert menu into page
 function displayPanel() {
-	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Stroke<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Stroke<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black Stroke</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="hideArticleContentCheckbox" value="hideArticleContent"> Hide Article Content<br><input type="checkbox" id="staticViewCheckbox" value="staticView"> Static View<br><br><button type="submit" id="optionsSaveButton">Save and Refresh</button><div id="optionsStatus"></div></form></div>');
+	$("body").append('<div id="options"><div id="optionsHeader"><div id="optionsTitle">Topo</div><div id="optionsPanelToggle">+</div></div><form id="optionsForm"><div id="displayChoices"><input type="radio" name="displayChoice" id="fillRadio" value="fill"> Fill<br><input type="radio" name="displayChoice" id="hybridRadio" value="hybrid"> Stroke<br><input type="radio" name="displayChoice" id="noneRadio" value="none"> None</div><div id="displayChoicesHidden"><input type="radio" name="displayChoice" id="yellowHybridRadio" value="yellowHybrid"> Yellow Stroke<br><input type="radio" name="displayChoice" id="blackHybridRadio" value="blackHybrid"> Black Stroke</div><hr><br>Number of articles per layer:<br><input type="text" id="incrementField" value="50"><br><br><input type="checkbox" id="staticViewCheckbox" value="staticView"> Static View<br><br><button type="submit" id="optionsSaveButton">Save and Refresh</button><br><br><input type="checkbox" id="showArticleContentCheckbox""> Show Article Content<div id="optionsStatus"></div></form></div>');
 }
 
 $("#optionsHeader").click(function() {
@@ -273,13 +318,12 @@ $("#optionsHeader").click(function() {
 
 
 // Saves options to storage.
-function save_options() {
+function saveOptions() {
 
 	var status = document.getElementById("optionsStatus");
 	var fillRadio = document.getElementById("fillRadio");
 	var hybridRadio = document.getElementById("hybridRadio");
 	var incrementField = document.getElementById("incrementField");
-	var hideArticleContentCheckbox = document.getElementById("hideArticleContentCheckbox");
 	var staticViewCheckbox = document.getElementById("staticViewCheckbox");
 
 	status.innerHTML = "";
@@ -319,13 +363,6 @@ function save_options() {
 		chrome.storage.sync.set({"increment": incrementField.value}, function() {});
 	}
 
-	// Figure out whether to hide article content and update storage with that info
-	if (hideArticleContentCheckbox.checked==true) {
-		chrome.storage.sync.set({"hideArticleContent": true}, function() {});
-	} else {
-		chrome.storage.sync.set({"hideArticleContent": false}, function() {});
-	}
-
 	// Figure out whether to turn on static view (turn off parallax) and update storage with that info
 	if (staticViewCheckbox.checked==true) {
 		chrome.storage.sync.set({"staticView": true}, function() {});
@@ -349,12 +386,12 @@ function save_options() {
 }
 
 // Restores select box state to saved value from localStorage.
-function restore_options() {
-	chrome.storage.sync.get(['savedOnce', 'displayType', 'increment', 'hideArticleContent', 'staticView', 'secretMenu'], function(data) {
+function restoreOptions() {
+	chrome.storage.sync.get(['savedOnce', 'displayType', 'increment', 'contentIsVisible', 'staticView', 'secretMenu'], function(data) {
 		savedOnce = data.savedOnce;
 		displayType = data.displayType;
 		increment = data.increment;
-		hideArticleContent = data.hideArticleContent;
+		contentIsVisible = data.contentIsVisible;
 		staticView = data.staticView;
 		secretMenu = data.secretMenu;
 
@@ -373,15 +410,15 @@ function restore_options() {
 		} else { document.getElementById("incrementField").value = increment;
 		}
 
-		if (hideArticleContent) { 
-			document.getElementById("hideArticleContentCheckbox").checked=true;
+		if (contentIsVisible) { 
+			document.getElementById("showArticleContentCheckbox").checked=true;
+		} else { 
+			document.getElementById("showArticleContentCheckbox").checked=false;  
 			hideWikiContent();
-		} else { document.getElementById("hideArticleContentCheckbox").checked=false;  
 		}
 
 		if (staticView) { 
 			document.getElementById("staticViewCheckbox").checked=true;
-			hideWikiContent();
 		} else { 
 			document.getElementById("staticViewCheckbox").checked=false;  
 
@@ -389,7 +426,6 @@ function restore_options() {
 			$(document).ready(function() {	
 			    $(window).bind('scroll',function(e){
 			    	scrolled = $(window).scrollTop();
-
 					// Go through each wikilink...
 					for (index = 0; index < wikilinks.length; index++) {
 						moveCircles(index);
@@ -401,7 +437,7 @@ function restore_options() {
 
 		if (secretMenu) { $("#displayChoicesHidden").css("display","inline-block"); }
 
-		// If settings have never been saved, automatically set fill = true, increment = 50, hideArticleContent = false, staticView = false
+		// If settings have never been saved, automatically set fill = true, increment = 50, contentIsVisible = true, staticView = false
 		if (!savedOnce) {
 			chrome.storage.sync.set({"displayType": "hybrid"}, function() {});
 			chrome.storage.sync.set({"increment": 50}, function() {});
@@ -409,7 +445,7 @@ function restore_options() {
 			document.getElementById("hybridRadio").checked=true;
 			$("#optionsForm").slideToggle();
 			increment = 50;
-			hideArticleContent = false;
+			contentIsVisible = true;
 			staticView = false;
 		} 
 
@@ -422,10 +458,10 @@ function moveCircles(index) {
 	// Only apply parallax effect if the wikilink is within the window frame (with a little buffer)
 	if ( ((wikilinks[index][4]) > scrolled) && (wikilinks[index][4] < (scrolled + windowHalfSize*2)) ) {
 
-		// Adjust top position for each of it's circles
+		// Adjust top position for each circle
 		for (j = 0; j < wikilinks[index][3]+1; j++) {
 
-			var perspectiveAdjuster = 0.01 * (j^(1/20)); 	// 
+			var perspectiveAdjuster = 0.01 * (j^(1/20)); 	// Circles further from screen-middle move faster (get further away)
 
 			$("#circle" + index + ".level_" + j).css({
 				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
@@ -436,4 +472,6 @@ function moveCircles(index) {
 }
 
 
-document.querySelector('#optionsSaveButton').addEventListener('click', save_options);
+
+document.querySelector('#optionsSaveButton').addEventListener('click', saveOptions);
+document.querySelector('#showArticleContentCheckbox').addEventListener('click', toggleWikiContent);
