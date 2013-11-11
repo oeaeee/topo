@@ -95,11 +95,12 @@ function drawCircles(index) {
 		wikilinks[index][4] = linkPosTop + linkHeight/2;
 		wikilinks[index][5] = linkPosLeft + linkWidth/2;
 
+		// Circles are drawn from the inside out
 		for (var n=wikilinks[index][3]; n > 0; n--) {
-			depthIncrementHeight = depthIncrementHeight * 0.98;
+			depthIncrementHeight = depthIncrementHeight * .98;
 			depthIncrementWidth = depthIncrementWidth * 0.98;
 
-			// Circles are drawn from smallest to biggest, set circle dimensions 
+			// Set circle dimensions 
 			circleHeight = circleHeight + depthIncrementHeight;
 			circleWidth = circleWidth + depthIncrementWidth;
 
@@ -131,33 +132,34 @@ function drawCircles(index) {
 		    if (displayType == "fill") {
 				$("#content.mw-body").css({ background: "hsl(100, 60%, 80%)" });
 
-	    		var bgHueFill = 100 - 3*n;
-				var bgSatFill = 60;
-				var bgLumFill = 80 + 2*n;
+	    		var bgHue = 100 - 3*n;
+				var bgSat = 60;
+				var bgLum = 80 + 2*n;
 				if (n > 9) {
-					bgLumFill = 98 - 2*(n-9);
+					bgLum = 98 - 2*(n-9);
 				}
 
 				// Style circles
-				$(".level_" + n + "#circle" + index).css({ background: "hsla(" + bgHueFill + "," + bgSatFill + "%," + bgLumFill + "%, 1.0)" });		
+				$(".level_" + n + "#circle" + index).css({ background: "hsla(" + bgHue + "," + bgSat + "%," + bgLum + "%, 1.0)" });		
 		    }
 
 			// Show hybrid styling if hybrid is selected
 			if (displayType == "hybrid") {
-				if (hybridOdd) {
-		    		var bgHueFill = 100 - 2*n;
-					var bgSatFill = 60;
-					var bgLumFill = 100 - 2*n;
+	    		var bgHue = 100 - 2*n;
+				var bgSat = 60;
+				var bgLum = 100 - 2*n;
 
-					if (n > 5) {
-						bgLumFill = 90;
-					}
+				if (n > 5) {
+					bgLum = 90;
+				}
+
+				if (hybridOdd) {
 					// For odd circles, show color
-					$(".level_" + n + "#circle" + index).css({ background: "hsla(" + bgHueFill + "," + bgSatFill + "%," + bgLumFill + "%, 1.0)" });		
+					$(".level_" + n + "#circle" + index).css({ background: "white" });
 					hybridOdd = false;
 				} else {
 					// For even circles, show white
-					$(".level_" + n + "#circle" + index).css({ background: "white" });
+					$(".level_" + n + "#circle" + index).css({ background: "hsla(" + bgHue + "," + bgSat + "%," + bgLum + "%, 1.0)" });		
 				    hybridOdd = true;
 				}
 			}
@@ -198,18 +200,17 @@ function drawCircles(index) {
 };
 
 function toggleWikiContent() {
-	// If content is visible, hide it and update storage settings
-	if (contentIsVisible == true) {  
+	// If content is visible, hide it
+	if (contentIsVisible) {  
 		hideWikiContent();
-		chrome.storage.sync.set({"contentIsVisible": false}, function() {});
-	// If content is hidden, show it and update storage settings
-	} else if (contentIsVisible == false) {
+	// If content is hidden, show it
+	} else if (!contentIsVisible) {
 		showWikiContent();
-		chrome.storage.sync.set({"contentIsVisible": true}, function() {});
 	}
 
 }
 
+// Hide content and update settings locally and globally
 function hideWikiContent() {
 	// Hide everything but title
 	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
@@ -234,10 +235,11 @@ function hideWikiContent() {
 		background: "white",
 	});	
 
-	contentIsVisible = true;
+	contentIsVisible = false;
+	chrome.storage.sync.set({"contentIsVisible": false}, function() {});
 };
 
-
+// Show content and update settings locally and globally
 function showWikiContent() {
 	// Show everything
 	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
@@ -265,7 +267,8 @@ function showWikiContent() {
 		background: "transparent",
 	});	
 
-	contentIsVisible = false;
+	contentIsVisible = true;
+	chrome.storage.sync.set({"contentIsVisible": true}, function() {});
 };
 
 
@@ -461,7 +464,7 @@ function moveCircles(index) {
 		// Adjust top position for each circle
 		for (j = 0; j < wikilinks[index][3]+1; j++) {
 
-			var perspectiveAdjuster = 0.01 * (j^(1/20)); 	// Circles further from screen-middle move faster (get further away)
+			var perspectiveAdjuster = 0.008 * j; 	// Higher elevation circles move faster (get further away)
 
 			$("#circle" + index + ".level_" + j).css({
 				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
