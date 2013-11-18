@@ -1,8 +1,24 @@
-// Search the article for #bodyContent and find all links pointing to other wikipedia articles
-var a = $("a[href^='/wiki']");
-
+/* Visual settings */
+// Size of smallest circle
 var baseCircleHeight = 2;
 var baseCircleWidth = 4;
+
+// Control steepness of slope
+// Note: Lower value = steeper slope
+var baseDepthIncrementHeight = 10;
+var baseDepthIncrementWidth = 16;
+
+// Control curve of slopes
+// 1 = linear slope (cone); less than 1 = concave (rounded); greater than 1 = convex (pointy)
+var depthRateHeight = 0.97;
+var depthRateWidth = 0.97;
+
+// Controls parallax effect—how quickly the peak moves relative to the base
+// Higher value = more dramatic effect
+var perspectiveAdjustment = 0.008; 	
+
+/* End visual settings */
+
 
 var savedOnce;
 var displayType;
@@ -10,24 +26,22 @@ var increment;
 var contentIsVisible;
 var staticView;
 var secretMenu;
-
 var scrolled = $(window).scrollTop();
 var windowHalfSize = window.innerHeight / 2;
+var wikilinks=new Array(); 			// Create array to store each wikilink object
+var a = $("a[href^='/wiki']"); 		// Find all links pointing to other wikipedia articles
 
 restoreOptions();
 
-// Create array to store each wikilink object
-var wikilinks=new Array(); 
-
 // Hide extraneous wikipedia elements
 $("body").css({
-	backgroundColor: "white"
+	background:"white"
 });
 $("#toc").css({
-	display: "none",
+	display: "none"
 });
 	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
-		backgroundColor: "transparent",
+		backgroundColor: "transparent"
 	});
 
 // Figure out how many backlinks each link has and call function to draw circles based on that info
@@ -81,9 +95,6 @@ function drawCircles(index) {
 		var circleObjects = "";
 		var hybridOdd = true;
 
-		var depthIncrementHeight = 10;
-		var depthIncrementWidth = 16;
-
 		// Math to find center location of link
 		var linkPosition = wikilinks[index][0].position();
 		var linkPosTop = linkPosition.top;
@@ -95,10 +106,14 @@ function drawCircles(index) {
 		wikilinks[index][4] = linkPosTop + linkHeight/2;
 		wikilinks[index][5] = linkPosLeft + linkWidth/2;
 
+		// Reset depth increments when starting a new circle
+		depthIncrementHeight = baseDepthIncrementHeight;
+		depthIncrementWidth = baseDepthIncrementWidth;
+
 		// Circles are drawn from the inside out
 		for (var n=wikilinks[index][3]; n > 0; n--) {
-			depthIncrementHeight = depthIncrementHeight * .98;
-			depthIncrementWidth = depthIncrementWidth * 0.98;
+			depthIncrementHeight = depthIncrementHeight * depthRateHeight; 
+			depthIncrementWidth = depthIncrementWidth * depthRateWidth;
 
 			// Set circle dimensions 
 			circleHeight = circleHeight + depthIncrementHeight;
@@ -460,14 +475,12 @@ function restoreOptions() {
 function moveCircles(index) {
 	// Only apply parallax effect if the wikilink is within the window frame (with a little buffer)
 	if ( ((wikilinks[index][4]) > scrolled) && (wikilinks[index][4] < (scrolled + windowHalfSize*2)) ) {
-
 		// Adjust top position for each circle
 		for (j = 0; j < wikilinks[index][3]+1; j++) {
-
-			var perspectiveAdjuster = 0.008 * j; 	// Higher elevation circles move faster (get further away)
-
 			$("#circle" + index + ".level_" + j).css({
-				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * perspectiveAdjuster + "px"
+				// Find the link position. Figure out how far it is from the center of browser window, position individual circuits based on that distance
+				//   link position       + (link position relative to (center of window))      * (perspective modifier)		 + "px"
+				top: wikilinks[index][4] + (wikilinks[index][4] - (scrolled + windowHalfSize)) * (perspectiveAdjustment * j) + "px"
 			});
 		}
     
