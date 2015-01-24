@@ -5,13 +5,13 @@ var baseCircleWidth = 4;
 
 // Control steepness of slope
 // Note: Lower value = steeper slope
-var baseDepthIncrementHeight = 10;
-var baseDepthIncrementWidth = 16;
+var baseDepthIncrementHeight = 8;
+var baseDepthIncrementWidth = 12;
 
 // Control curve of slopes
 // 1 = linear slope (cone); less than 1 = concave (rounded); greater than 1 = convex (pointy)
-var depthRateHeight = 0.97;
-var depthRateWidth = 0.97;
+var depthRateHeight = 1.0;
+var depthRateWidth = 1.0;
 
 // Controls parallax effect—how quickly the peak moves relative to the base
 // Higher value = more dramatic effect
@@ -42,6 +42,10 @@ $("#toc").css({
 });
 	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
 		backgroundColor: "transparent"
+	});
+	$("#firstHeading").css({
+		position: "relative",
+		zIndex: 1
 	});
 
 // Figure out how many backlinks each link has and call function to draw circles based on that info
@@ -145,13 +149,22 @@ function drawCircles(index) {
 
 			// Show fill color if fill is selected
 		    if (displayType == "fill") {
-				$("#content.mw-body").css({ background: "hsl(100, 60%, 80%)" });
+				$("#content.mw-body").css({ background: "hsl(100, 100%, 80%)" });
 
-	    		var bgHue = 100 - 3*n;
-				var bgSat = 60;
-				var bgLum = 80 + 2*n;
-				if (n > 9) {
-					bgLum = 98 - 2*(n-9);
+	    		var bgHue = 100;
+				var bgSat = 100 - 4*n;
+				var bgLum = 80;
+
+				if (bgSat < 50) {	
+					bgSat = 50;
+					bgHue = 100 - 4*(n-12.5);
+				}
+				if (bgHue < 20) {
+					bgHue = 20;
+					bgLum = bgLum + (n - 32.5)/4 ;
+				}
+				if (bgLum > 100) {
+					bgLum = 100;
 				}
 
 				// Style circles
@@ -160,9 +173,13 @@ function drawCircles(index) {
 
 			// Show hybrid styling if hybrid is selected
 			if (displayType == "hybrid") {
+
 	    		var bgHue = 100 - 2*n;
 				var bgSat = 60;
 				var bgLum = 100 - 2*n;
+
+
+				$("#content.mw-body").css({ background: "hsla(98, 60%, 98%, 1.0)" });
 
 				if (n > 5) {
 					bgLum = 90;
@@ -170,7 +187,7 @@ function drawCircles(index) {
 
 				if (hybridOdd) {
 					// For odd circles, show color
-					$(".level_" + n + "#circle" + index).css({ background: "white" });
+					$(".level_" + n + "#circle" + index).css({ background: "hsla(98, 60%, 98%, 1.0)" });
 					hybridOdd = false;
 				} else {
 					// For even circles, show white
@@ -228,27 +245,22 @@ function toggleWikiContent() {
 // Hide content and update settings locally and globally
 function hideWikiContent() {
 	// Hide everything but title
-	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
+	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, #siteSub, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
 		color: "transparent",
 		backgroundColor: "transparent",
-		border: "none",
+		border: "none"
 	});
 	$("img, ul, .external, .mediaContainer, .reference-text, code").css({
-		opacity: 0.0,
+		opacity: 0.0
 	});
 
 	// Style title
-	$(".firstHeading span").css({
-		background: "white",
-		position: "inherit",
-	});
 	$(".firstHeading").css({
-		borderBottom: "none",
+		borderBottom: "1px solid transparent",
+		position: "fixed",
+		fontSize: "3.0em",
+		background: "white"
 	});
-	$("#siteSub").css({
-		color: "black",
-		background: "white",
-	});	
 
 	contentIsVisible = false;
 	chrome.storage.sync.set({"contentIsVisible": false}, function() {});
@@ -257,30 +269,25 @@ function hideWikiContent() {
 // Show content and update settings locally and globally
 function showWikiContent() {
 	// Show everything
-	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
+	$("#content.mw-body, #content.mw-body a, .mw-body div, .mw-code, #siteSub, .de1, .de1 span, .mw-body table, .mw-body tr, .mw-body td, .mw-body th, h2, h3, h4, .mw-editsection-bracket, .mw-editsection-divider, #content.mw-body ul, .thumbcaption, .thumb, .noprint, .rquote, .navbox, .catlinks, .external, .infobox").css({
 		color: "black",
 		backgroundColor: "transparent",
 		border: "none"
 	});
 	$("img, ul, .external, .mediaContainer, .reference-text, code").css({
-		opacity: 1.0,
-	});
-	$("#firstHeading, h2").css({
-		borderBottom: "1px solid #aaa"
+		opacity: 1.0
 	});
 	$(".infobox, .catlinks").css({
 		border: "1px solid #aaa"
 	});
 
 	// Style title
-	$(".firstHeading span").css({
+	$(".firstHeading").css({
 		background: "transparent",
-		position: "inherit",
+		position: "relative",
+		borderBottom: "1px solid #aaa",
+		fontSize: "none"
 	});
-	$("#siteSub").css({
-		color: "black",
-		background: "transparent",
-	});	
 
 	contentIsVisible = true;
 	chrome.storage.sync.set({"contentIsVisible": true}, function() {});
@@ -373,8 +380,8 @@ function saveOptions() {
 		status.innerHTML = status.innerHTML + "<font color='red'>Not a valid increment.</font>";
 		return;
 	// Form validation: Make sure increment is at least 10
-	} else if (incrementField.value < 10) {
-		status.innerHTML = status.innerHTML + "<font color='red'>Increment must be 10 or more.</font>";
+	} else if (incrementField.value < 1) {
+		status.innerHTML = status.innerHTML + "<font color='red'>Increment must be more than 0.</font>";
 		return;
 	// If increment input is valid, update storage
 	} else {

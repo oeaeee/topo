@@ -1,6 +1,6 @@
 {
   "name" : "Topo",
-  "version" : "0.202",
+  "version" : "0.203",
   "description" : "Topo generates topographic maps of Wikipedia articles to visualize information depth.",
   "background" : {
     "scripts": ["background.js"]
